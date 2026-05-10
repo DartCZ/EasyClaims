@@ -29,7 +29,9 @@ public class ClaimImageBuilder {
     private final long index;
     private final World world;
     @Nonnull
-    private final MapImage image;
+    private MapImage image;
+    @Nonnull
+    private final int[] pixels;
     private final int sampleWidth;
     private final int sampleHeight;
     private final int blockStepX;
@@ -57,7 +59,8 @@ public class ClaimImageBuilder {
     public ClaimImageBuilder(long index, int imageWidth, int imageHeight, World world) {
         this.index = index;
         this.world = world;
-        this.image = new MapImage(imageWidth, imageHeight, new int[imageWidth * imageHeight]);
+        this.pixels = new int[imageWidth * imageHeight];
+        this.image = MapImagePixels.fromRgbaPixels(imageWidth, imageHeight, this.pixels);
         this.sampleWidth = Math.min(32, this.image.width);
         this.sampleHeight = Math.min(32, this.image.height);
         this.blockStepX = Math.max(1, 32 / this.image.width);
@@ -361,7 +364,7 @@ public class ClaimImageBuilder {
                     }
                 }
 
-                this.image.data[iz * this.image.width + ix] = this.outColor.pack();
+                this.pixels[iz * this.image.width + ix] = this.outColor.pack();
             }
         }
 
@@ -369,6 +372,8 @@ public class ClaimImageBuilder {
         if (claimOwner != null) {
             drawClaimText(worldName, chunkX, chunkZ, pvpDisabled);
         }
+
+        this.image = MapImagePixels.fromRgbaPixels(this.image.width, this.image.height, this.pixels);
 
         return this;
     }
@@ -400,7 +405,7 @@ public class ClaimImageBuilder {
 
         // Draw owner/display name (white text with black outline for crisp visibility)
         BitmapFont.drawTextCenteredWithOutline(
-            this.image.data, this.image.width, this.image.height,
+            this.pixels, this.image.width, this.image.height,
             displayName, startY,
             BitmapFont.WHITE, BitmapFont.BLACK
         );
@@ -412,7 +417,7 @@ public class ClaimImageBuilder {
             if (trustedCount >= 2) break;
 
             BitmapFont.drawTextCenteredWithOutline(
-                this.image.data, this.image.width, this.image.height,
+                this.pixels, this.image.width, this.image.height,
                 trustedName, trustedY,
                 BitmapFont.YELLOW, BitmapFont.BLACK
             );

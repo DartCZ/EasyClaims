@@ -53,7 +53,7 @@ public class MapImageCompositor {
         // Draw border on all edges
         drawBorder(pixels, width, height, borderColor, BORDER_WIDTH);
 
-        return new MapImage(width, height, pixels);
+        return MapImagePixels.fromRgbaPixels(width, height, pixels);
     }
 
     /**
@@ -79,6 +79,7 @@ public class MapImageCompositor {
         int width = base.width;
         int height = base.height;
         int[] result = new int[width * height];
+        int[] basePixels = MapImagePixels.toRgbaPixels(base);
 
         int fillColor = ClaimColorGenerator.getPlayerColorARGB(ownerName, FILL_ALPHA);
         int borderColor = ClaimColorGenerator.getBorderColorARGB(ownerName, BORDER_ALPHA);
@@ -87,7 +88,7 @@ public class MapImageCompositor {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int idx = y * width + x;
-                int basePixel = base.data[idx];
+                int basePixel = basePixels[idx];
 
                 // Check if this pixel is on the border
                 boolean isBorder = x < BORDER_WIDTH || x >= width - BORDER_WIDTH ||
@@ -98,7 +99,7 @@ public class MapImageCompositor {
             }
         }
 
-        return new MapImage(width, height, result);
+        return MapImagePixels.fromRgbaPixels(width, height, result);
     }
 
     /**
@@ -118,7 +119,7 @@ public class MapImageCompositor {
         // Draw border only
         drawBorder(pixels, width, height, borderColor, BORDER_WIDTH);
 
-        return new MapImage(width, height, pixels);
+        return MapImagePixels.fromRgbaPixels(width, height, pixels);
     }
 
     /**
@@ -250,6 +251,6 @@ public class MapImageCompositor {
             }
         }
 
-        return new MapImage(width, height, pixels);
+        return MapImagePixels.fromRgbaPixels(width, height, pixels);
     }
 }

@@ -35,9 +35,13 @@ import java.util.function.Consumer;
 public class ChunkVisualizerGui extends InteractiveCustomUIPage<ChunkVisualizerGui.GuiData> {
 
     private static final Color WILDERNESS_COLOR = new Color(0, 170, 0, 34);
+    private static final Color WILDERNESS_OUTLINE_COLOR = new Color(10, 40, 10, 220);
     private static final Color OWN_CLAIM_COLOR = new Color(85, 255, 255, 128);
     private static final Color OTHER_CLAIM_COLOR = new Color(255, 85, 85, 128);
     private static final Color ADMIN_CLAIM_COLOR = new Color(170, 85, 255, 128);  // Purple for admin claims
+    private static final Color OWN_CLAIM_OUTLINE_COLOR = new Color(40, 170, 170, 220);
+    private static final Color OTHER_CLAIM_OUTLINE_COLOR = new Color(170, 40, 40, 220);
+    private static final Color ADMIN_CLAIM_OUTLINE_COLOR = new Color(120, 60, 190, 220);
     private static final String GOLD_COLOR = "#93844c";
 
     private final int centerChunkX;
@@ -235,7 +239,7 @@ public class ChunkVisualizerGui extends InteractiveCustomUIPage<ChunkVisualizerG
                     }
 
                     uiCommandBuilder.set("#ChunkCards[" + z + "][" + x + "].Background.Color", ColorParseUtil.colorToHexAlpha(chunkColor));
-                    uiCommandBuilder.set("#ChunkCards[" + z + "][" + x + "].OutlineColor", ColorParseUtil.colorToHexAlpha(chunkColor));
+                    uiCommandBuilder.set("#ChunkCards[" + z + "][" + x + "].OutlineColor", ColorParseUtil.colorToHexAlpha(getOutlineColor(isAdminClaim, owner.equals(playerId))));
                     uiCommandBuilder.set("#ChunkCards[" + z + "][" + x + "].OutlineSize", 1);
 
                     // Build tooltip - use simple text since Message doesn't support append
@@ -267,6 +271,9 @@ public class ChunkVisualizerGui extends InteractiveCustomUIPage<ChunkVisualizerG
                     }
                 } else {
                     // Unclaimed wilderness
+                    uiCommandBuilder.set("#ChunkCards[" + z + "][" + x + "].Background.Color", ColorParseUtil.colorToHexAlpha(WILDERNESS_COLOR));
+                    uiCommandBuilder.set("#ChunkCards[" + z + "][" + x + "].OutlineColor", ColorParseUtil.colorToHexAlpha(WILDERNESS_OUTLINE_COLOR));
+                    uiCommandBuilder.set("#ChunkCards[" + z + "][" + x + "].OutlineSize", 1);
                     uiCommandBuilder.set("#ChunkCards[" + z + "][" + x + "].TooltipTextSpans",
                             Message.raw("Wilderness\n\nLeft Click to Claim").color(new Color(0, 170, 0)));
 
@@ -279,6 +286,17 @@ public class ChunkVisualizerGui extends InteractiveCustomUIPage<ChunkVisualizerG
                 }
             }
         }
+    }
+
+    @Nonnull
+    private static Color getOutlineColor(boolean isAdminClaim, boolean isOwnClaim) {
+        if (isAdminClaim) {
+            return ADMIN_CLAIM_OUTLINE_COLOR;
+        }
+        if (isOwnClaim) {
+            return OWN_CLAIM_OUTLINE_COLOR;
+        }
+        return OTHER_CLAIM_OUTLINE_COLOR;
     }
 
     /**

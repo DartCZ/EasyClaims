@@ -27,6 +27,7 @@ public class EasyClaimsCommand extends AbstractCommandCollection {
     public EasyClaimsCommand(EasyClaims plugin) {
         super("easyclaims", "Land claiming and protection commands");
         requirePermission("easyclaims.use");
+        addAliases("ec");
 
         // Register all subcommands - these will appear in /help
         addSubCommand(new GuiSubcommand(plugin));

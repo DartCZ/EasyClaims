@@ -1,7 +1,8 @@
 package com.easyclaims.selection;
 
 import com.hypixel.hytale.math.vector.Vector3i;
-import com.hypixel.hytale.protocol.packets.buildertools.BuilderToolSelectionUpdate;
+import com.hypixel.hytale.protocol.packets.buildertools.BuilderToolHideAnchors;
+import com.hypixel.hytale.protocol.packets.buildertools.BuilderToolShowAnchor;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 
@@ -14,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Manages claim mode for players.
  * When in claim mode, players can click to set selection corners,
- * and a bounding box is rendered by sending BuilderToolSelectionUpdate packets.
+ * and corner anchors are rendered on the client for the current selection.
  */
 public class ClaimSelectionManager {
 
@@ -108,17 +109,24 @@ public class ClaimSelectionManager {
     }
 
     /**
-     * Sends a BuilderToolSelectionUpdate packet to show the selection box.
+     * Sends anchor packets to visualize the current selection bounds.
      */
     private void sendSelectionPacket(PlayerRef playerRef, int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
         try {
             System.out.println("[ClaimSelection] Sending selection packet: " +
                 minX + "," + minY + "," + minZ + " to " + maxX + "," + maxY + "," + maxZ);
-            BuilderToolSelectionUpdate packet = new BuilderToolSelectionUpdate(
-                minX, minY, minZ,
-                maxX, maxY, maxZ
-            );
-            playerRef.getPacketHandler().write(packet);
+            playerRef.getPacketHandler().write(new BuilderToolHideAnchors());
+
+            // Mark all corners so players can see the chunk bounds in newer APIs.
+            playerRef.getPacketHandler().write(new BuilderToolShowAnchor(minX, minY, minZ));
+            playerRef.getPacketHandler().write(new BuilderToolShowAnchor(minX, minY, maxZ));
+            playerRef.getPacketHandler().write(new BuilderToolShowAnchor(maxX, minY, minZ));
+            playerRef.getPacketHandler().write(new BuilderToolShowAnchor(maxX, minY, maxZ));
+            playerRef.getPacketHandler().write(new BuilderToolShowAnchor(minX, maxY, minZ));
+            playerRef.getPacketHandler().write(new BuilderToolShowAnchor(minX, maxY, maxZ));
+            playerRef.getPacketHandler().write(new BuilderToolShowAnchor(maxX, maxY, minZ));
+            playerRef.getPacketHandler().write(new BuilderToolShowAnchor(maxX, maxY, maxZ));
+
             System.out.println("[ClaimSelection] Packet sent successfully!");
         } catch (Exception e) {
             System.out.println("[ClaimSelection] ERROR sending packet: " + e.getMessage());
@@ -133,10 +141,7 @@ public class ClaimSelectionManager {
         if (playerRef == null) return;
 
         try {
-            // Send a "zero" selection to clear
-            // Using Integer.MAX_VALUE/MIN_VALUE to indicate no selection
-            BuilderToolSelectionUpdate packet = new BuilderToolSelectionUpdate(0, 0, 0, 0, 0, 0);
-            playerRef.getPacketHandler().write(packet);
+            playerRef.getPacketHandler().write(new BuilderToolHideAnchors());
         } catch (Exception e) {
             e.printStackTrace();
         }
